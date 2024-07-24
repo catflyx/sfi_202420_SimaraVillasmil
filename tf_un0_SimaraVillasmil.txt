@@ -1,5 +1,1 @@
-Área de trabajo (Working tree): Es el directorio en el cual se está trabajando.
-
-Área de preparación (staged): Es dónde se añaden los archivos que están listos para el commit.
-
-Directorio de git: Es en donde quedan guardados todas las versiones, es decir, todos los commits.
+Las ramas de Git se utilizan para categorizar la información guardada. Es decir, se usan para organizar los archivos principales (main), de los no tan principales (otras ramas).
