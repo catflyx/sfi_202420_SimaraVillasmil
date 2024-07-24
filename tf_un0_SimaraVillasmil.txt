@@ -1,1 +1,5 @@
-El repositorio local es el que se encuentra dentro del equipo, y solo se pueden encontrar las versiones en dicho equipo; es el que se accede con Git / Git bash. Por otro lado, el repositorio remoto es el que se encuentra en la página de GitHub, y en el cual pueden trabajar más de un colaborador, o puede ser accedido o clonado por otras personas. De igual forma, las versiones quedan directamente subidas en la página.
+1. Git guarda las versiones únicamente en el equipo, mientras que GitHub guarda las versiones en la página.
+
+2. Para Git solo se necesita un repositorio local (.git), mientras que para GitHub se necesita subir o crear un repositorio en la página; así como tener una cuenta de GitHub.
+
+3. Git es para trabajar de forma autónoma, y GitHub se puede trabajar tanto de forma autónoma como colaborativa.
