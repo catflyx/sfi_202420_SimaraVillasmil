@@ -1,5 +1,5 @@
-1. Git guarda las versiones únicamente en el equipo, mientras que GitHub guarda las versiones en la página.
+Área de trabajo (Working tree): Es el directorio en el cual se está trabajando.
 
-2. Para Git solo se necesita un repositorio local (.git), mientras que para GitHub se necesita subir o crear un repositorio en la página; así como tener una cuenta de GitHub.
+Área de preparación (staged): Es dónde se añaden los archivos que están listos para el commit.
 
-3. Git es para trabajar de forma autónoma, y GitHub se puede trabajar tanto de forma autónoma como colaborativa.
+Directorio de git: Es en donde quedan guardados todas las versiones, es decir, todos los commits.
