@@ -25,7 +25,7 @@ Es un programa que evalúa desde el la función `loop` si se ha presionado la te
 ####
 
 
-En el proyecto de Unity, en un script de C# poner el siugiente código:
+Crea un nuevo C# Script y un Game Object en Unity 2D. Añade el Script al GameObject. Ve al menu Assets y luego selecciona Open C# Project.
 ``` c++
 using UnityEngine;
 using System.IO.Ports;
