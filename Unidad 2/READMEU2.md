@@ -65,11 +65,9 @@ void Update()
 }
 ```
 Analiza:
-- ¿Por qué es importante considerar las propiedades `PortName` y `BaudRate`?
-`PortName` hay que considerarlo ya que es desde donde se leerá la placa, y necesita estar bien definido. Mientras tanto, `BaudRate` funfiona como el `Serial.begin()`, fijando la velocidad a la que se envía datos en 115200.
+- ¿Por qué es importante considerar las propiedades `PortName` y `BaudRate`? ¿Qué relación tienen las propiedades anteriores con el controlador?
 ####
-- ¿Qué relación tienen las propiedades anteriores con el controlador?
-(?)
+`PortName` hay que considerarlo ya que es desde donde se leerá la placa, y necesita estar bien definido. Mientras tanto, `BaudRate` funfiona como el `Serial.begin()`, fijando la velocidad a la que se envía datos en 115200.
 
 # Ejercicio 2
 Ahora realiza este experimento. Modifica la aplicación del PC así:
