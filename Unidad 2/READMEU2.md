@@ -23,8 +23,6 @@ if(Serial.read() == '1'){
 - Prueba la aplicación con ScriptCommunicator. **¿Cómo funciona?**
 Es un programa que evalúa desde el la función `loop` si se ha presionado la tecla del '1'. Si es así, se imprime el mensaje `"Hello from Raspberry Pi Pico"`.
 ####
-
-
 Crea un nuevo C# Script y un Game Object en Unity 2D. Añade el Script al GameObject. Ve al menu Assets y luego selecciona Open C# Project.
 ``` c++
 using UnityEngine;
@@ -36,7 +34,7 @@ private byte[] buffer =new byte[32];
 
 void Start()
     {
-        _serialPort.PortName = "COM3";
+        _serialPort.PortName = "COM4";
         _serialPort.BaudRate = 115200;
         _serialPort.DtrEnable =true;
         _serialPort.Open();
@@ -67,11 +65,11 @@ void Update()
 }
 ```
 Analiza:
-- ¿Por qué es importante considerar las propiedades *PortName* y *BaudRate*?
-texto.
+- ¿Por qué es importante considerar las propiedades `PortName` y `BaudRate`?
+`PortName` hay que considerarlo ya que es desde donde se leerá la placa, y necesita estar bien definido. Mientras tanto, `BaudRate` funfiona como el `Serial.begin()`, fijando la velocidad a la que se envía datos en 115200.
 ####
 - ¿Qué relación tienen las propiedades anteriores con el controlador?
-texto.
+(?)
 
 # Ejercicio 2
 Ahora realiza este experimento. Modifica la aplicación del PC así:
@@ -91,7 +89,7 @@ public class Serial : MonoBehaviour
 
 	void Start()
     {
-        _serialPort.PortName = "COM3";
+        _serialPort.PortName = "COM4";
         _serialPort.BaudRate = 115200;
         _serialPort.DtrEnable =true;
         _serialPort.Open();
