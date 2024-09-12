@@ -181,15 +181,19 @@ public class Serial : MonoBehaviour
 No, al final le faltana un `}`.
 ####
 - Por ejemplo, ¿Qué pasaría si al momento de ejecutar la instrucción `int numData = _serialPort.Read(buffer, 0, 20);` solo han llegado *10* de los *16* bytes del mensaje?
+####
 No se enviaría el mensaje completo, pues bytes menores a 16 ya se condiseran incompletos.
 ####
 - ¿Cómo puede hacer tu programa para saber que ya tiene el mensaje completo?
+####
 Si tiene 16 o más bytes.
 ####
 - ¿Cómo se podría garantizar que antes de hacer la operación `Read` tenga los *16 bytes* listos para ser leídos?
+####
 Que en el mínimo se ponga un 16 directamente, y asi no se enviarán mensajes con menor número de bytes. (`int numData = _serialPort.Read(buffer, 16, 20);`)
 ####
 - Además, si los mensajes que envía el controlador tienen tamaños diferentes, ¿Cómo haces para saber que el mensaje enviado está **completo** o **faltan bytes** por recibir?
+####
 Ponerle un delimitador o `\n` al final a los mensajes siempre, pues al detectarse este delimitador el programa enviará todos los caractéres anteriores a este.
 
 # Ejercicio 3
@@ -337,7 +341,7 @@ void Update()
 }
 ```
 ¿Recuerdas las preguntas presentadas en el experimento anterior? **¿Aquí nos pasa lo mismo?**
-
+No. (?)
 ####
 
 # Ejercicio 4
@@ -449,7 +453,7 @@ public classSerial : MonoBehaviour
 		void Start()
     {
 				_serialPort =new SerialPort();
-        _serialPort.PortName = "COM3";
+        _serialPort.PortName = "COM4";
         _serialPort.BaudRate = 115200;
         _serialPort.DtrEnable =true;
         _serialPort.NewLine = "\n";
@@ -501,6 +505,6 @@ public classSerial : MonoBehaviour
 ...
 
 # Ejercicio 5
-
+Con todo lo que has aprendido hasta ahora, vas a volver a darle una mirada al material expuesto desde el **ejercicio 1** hasta el **ejercicio 4**. Una iteración más cae bien. Pero la idea de este ejercicio es que le *expliques a un compañero cada ejercicio mientras tu compañero será hacerte preguntas*. Después se invierten los papeles.
 
 # RETO BONIFICACIÓN
