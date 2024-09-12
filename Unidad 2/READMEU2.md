@@ -132,6 +132,7 @@ void loop()
 }
 ```
 Ejecuta la aplicación en Unity. Verás un número cambiar rápidamente en pantalla. Ahora presiona la `tecla A` (no olvides dar click en la pantalla Game). **¿Qué pasa? ¿Por qué crees que ocurra esto?**
+####
 En la consola dice que se han recibido *20 bytes* cada que se presiona la `tecla A`. Creería que esto sucede porque se está definiendo esta variable `int numData = _serialPort.Read(buffer, 0, 20);` con un 20, y esta misma es la que se pide que se imprima.
 ####
 Prueba con el siguiente código. Luego, *ANALIZA CON DETENIMIENTO*. Una vez más, no olvides cambiar el puerto serial.
@@ -341,8 +342,8 @@ void Update()
 }
 ```
 ¿Recuerdas las preguntas presentadas en el experimento anterior? **¿Aquí nos pasa lo mismo?**
-No. (?)
 ####
+No, pues una vez se presiona la `techa A` y se entra al **estado** `WAIT_START`, el pc empieza un conteo indefinido hasta que se presione la `tecla B`, la cual hará que el conteo pare y solo continue hasta que vuelva a presionarse desde la `tecla A`. El objeto de texto sin embargo, en ambos programas inicia apenas inicia el programa y no se detiene hasta que este acabe.
 
 # Ejercicio 4
 Ahora vas a analizar cómo puedes resolver el problema anterior. Puntualmente, analiza el siguiente programa del controlador:
