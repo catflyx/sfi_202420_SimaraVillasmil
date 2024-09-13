@@ -443,7 +443,7 @@ enum TaskState
     WAIT_COMMANDS
 }
 
-public classSerial : MonoBehaviour
+public class Serial : MonoBehaviour //Tenía el class Serial pegado
 {
 		private static TaskState taskState = TaskState.INIT;
 		private SerialPort _serialPort;
@@ -485,7 +485,7 @@ public classSerial : MonoBehaviour
                     _serialPort.Write("ledOFF\n");
                     Debug.Log("Send ledOFF");
                 }
-								if (Input.GetKeyDown(KeyCode.R))
+								if (Input.GetKeyDown(KeyCode.D))
                 {
                     _serialPort.Write("readBUTTONS\n");
                     Debug.Log("Send readBUTTONS");
@@ -503,9 +503,35 @@ public classSerial : MonoBehaviour
     }
 }
 ```
-...
+Todo bien -b
 
 # Ejercicio 5
 Con todo lo que has aprendido hasta ahora, vas a volver a darle una mirada al material expuesto desde el **ejercicio 1** hasta el **ejercicio 4**. Una iteración más cae bien. Pero la idea de este ejercicio es que le *expliques a un compañero cada ejercicio mientras tu compañero será hacerte preguntas*. Después se invierten los papeles.
 
 # RETO BONIFICACIÓN
+El reto consiste en implementar un sistema que permita, mediante una *interfaz gráfica* en Unity interactuar con el controlador. 
+####
+La idea será que puedas leer el **estado de una variable** que estará cambiando en el controlador y cambiar el **estado** del `LED verde` del controlador. Ten presente que aunque este ejercicio usa un controlador simple, los conceptos asociados a su manejo pueden fácilmente extrapolarse a dispositivos y sistemas más complejos.
+
+**Protocolo de comunicación:**
+
+- El PC SIEMPRE inicia la comunicación solicitando información al controlador. Es decir, desde la aplicación del PC siempre se solicita información y el controlador responde.
+- Desde el PC se enviarán tres solicitudes: `read`, `outON`, `outOFF`.
+- Para enviar los comandos anteriores usarás los botones de la interfaz de usuario.
+- El controlador enviará los siguientes mensajes de respuesta a cada solicitud:
+    - Respuesta a `read`: `estadoContador,estadoLED`. Por ejemplo, una posible respuesta será: `235,OFF`. Quiere decir que el contador está en 235 y el LED está apagado.
+    - Respuesta a `outON` y `outOFF`: `estadoLED`. Es decir, el controlador recibe el comando, realiza la orden solicitada y devuelve el estado en el cual quedó el LED luego de la orden.
+- No olvides que DEBES terminar TODOS los mensajes con el carácter NEWLINE (`\n`) para que ambas partes sepan que el mensaje está completo.
+
+Código del controlador:
+```
+```
+Código del PC:
+```
+```
+Interfaz
+
+####
+
+### *¿Cómo funciona?*
+texto.
