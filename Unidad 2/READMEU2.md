@@ -522,7 +522,7 @@ La idea será que puedas leer el **estado de una variable** que estará cambiand
     - Respuesta a `read`: `estadoContador,estadoLED`. Por ejemplo, una posible respuesta será: `235,OFF`. Quiere decir que el contador está en 235 y el LED está apagado.
     - Respuesta a `outON` y `outOFF`: `estadoLED`. Es decir, el controlador recibe el comando, realiza la orden solicitada y devuelve el estado en el cual quedó el LED luego de la orden.
 - No olvides que DEBES terminar TODOS los mensajes con el carácter NEWLINE (`\n`) para que ambas partes sepan que el mensaje está completo.
-
+###
 Código del controlador:
 ``` c++
 String btnState(uint8_t btnState)
@@ -610,11 +610,138 @@ void loop()
 ```
 Código del PC:
 ``` c++
+using UnityEngine;
+using System.IO.Ports;
+using TMPro;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
+using System.Threading.Tasks;
+using System;
+
+enum TaskState
+{
+    INIT,
+    WAIT_COMMANDS
+}
+
+public class Serial : MonoBehaviour
+{
+
+private static TaskState taskState = TaskState.INIT;
+private SerialPort _serialPort;
+private byte[] buffer;
+
+public TextMeshProUGUI myText;
+private int counter = 0;
+
+    public GameObject ledOn; static bool led;
+    public TextMeshProUGUI textbox; private string box;
+
+    void Start()
+    {
+    _serialPort = new SerialPort();
+    _serialPort.PortName = "COM4";
+    _serialPort.BaudRate = 115200;
+    _serialPort.DtrEnable = true;
+    _serialPort.NewLine = "\n";
+    _serialPort.Open();
+    Debug.Log("Open Serial Port");
+    buffer = new byte[128];
+
+        ledOn.SetActive(false); led = false;
+    }
+
+void Update()
+{
+    myText.text = counter.ToString();
+    counter++;
+
+        textbox.text = box;
+
+    switch (taskState)
+    {
+        case TaskState.INIT:
+            taskState = TaskState.WAIT_COMMANDS;
+            Debug.Log("WAIT COMMANDS");
+            box = "WAIT COMMANDS";
+            break;
+        case TaskState.WAIT_COMMANDS:
+            if (_serialPort.BytesToRead > 0)
+            {
+                string response = _serialPort.ReadLine();
+                Debug.Log(response);
+                //box = response;
+            }
+            break;
+        default:
+            Debug.Log("State Error");
+            box = "State Error" ;
+            break;
+    }
+}
+    public void ON()
+    {
+        _serialPort.Write("ledON\n");
+        Debug.Log("LED = ON\n");
+        box = "LED = ON\n"; ledOn.SetActive(true); led = true;
+    }
+    public void OFF()
+    {
+        _serialPort.Write("ledOFF\n");
+        Debug.Log("LED = OFF\n");
+        box = "LED = OFF\n"; ledOn.SetActive(false); led = false;
+    }
+    public void READ()
+    {
+        _serialPort.Write("readBUTTONS\n");
+        Debug.Log(counter + "," + (led == true ? "ON" : "OFF") + "\n");
+        Debug.Log("Send readBUTTONS\n");
+
+        box = counter + "," + (led == true ? "ON" : "OFF") + "\n";
+        //box = "Send readBUTTONS\n" ;
+    }
+}
+```
+#### Interfaz
+![image](https://github.com/user-attachments/assets/b0e9a1e4-1544-4b23-88bb-038eefd4eac8)
+####
+### *¿Cómo funciona?*
+El programa empieza y en en la interfaz se visualizan seis elementos principales:
+- En la esquina superior, está el `contador`.
+- En la parte inferior, está el `cuadro de texto` por donde se imprimirán los mensajes indicados.
+- Encima de este, están los tres *botones* que representan las funciones `ON`, `OFF` y `READ` respectivamente.
+- El cuadrado encima de estos, es una `representación del led`, el cual cambiará cada que se presionen los botones de `ON` u `OFF`.
+####
+Cuando el programa inicia, lo único que se verá será el contador subiendo, la representación del led apagado, y en el cuadro de texto la oración **"WAIT COMMANDS"**. Si se presiona el botón `ON`, el led se encenderá, y en el cuadro de texto dirá **"LED = ON"**; y se se presiona `OFF`, viceversa. Al presionar `READ` sin embargo, el cuadro de texto mostrará el número en el que se encontraba el contador al presionar dicho botón, y al lado el estado actual del led (ON/OFF).
+
+# TRABAJO FINAL
+Tu equipo ha sido contratado para desarrollar una aplicación del área de educación financiera en la modalidad de **Scape Room**, donde una aplicación correrá en el PC y la otra en el microcontrolador.  Debes relacionar *variables* de tipo *ambiental* con variables de tipo *psicológico* que permitan aprendizajes financieros.
+####
+Debes construir una **narrativa** de la experiencia y detallar lo que el usuario **debe realizar** y debe tener un propósito de aprendizaje.
+####
+### **La aplicación en el PC debe:**
+- *Interactuar* con el usuario por medio de elementos de interfaz de usuario, tales como `botones`, `cajas de texto`, `textos en pantalla`, entre otros. Nota: Solo se debe usar la *consola para depuración y no para interacción*.
+- Leer el **estado** de *tres (3) variables* de la aplicación del microcontrolador.
+- La aplicación del PC deberá **solicitar** el *valor* y *estado* de las variables a través de una `única instrucción` y el microcontrolador debe **reportar** toda la información de las tres variables en un `único mensaje`… Ojo, no por separado, en una misma trama.
+- Permitir configurar la *velocidad* a la cual **cambiará la variable** y si debe cambiar o no, como también, permitir **definir** el *valor inicial* de la variable.
+
+### **La aplicación en el microcontrolador debe:**
+- Verificar si debe *cambiar* la variable y modificarla en tiempo real, siempre y cuando **esté habilitada para cambiar**b. La función de cambio será simplemente `aumentar en uno el valor previo a la velocidad especificada`.
+- Mantener un `LED funcionando a una frecuencia de 1 Hz`. El objetivo de este LED es que se pueda *verificar de manera visual* que la aplicación en el microcontrolador NUNCA se bloquea. Esto implica que la **señal de activación se genera en el PC**.
+###
+Código del controlador:
+``` c++
 
 ```
-Interfaz
+Código del PC:
+``` c++
+
+```
+#### Interfaz
 
 ####
-
 ### *¿Cómo funciona?*
-texto.
+...
+
+
+
+
