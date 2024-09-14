@@ -714,7 +714,7 @@ El programa empieza y en en la interfaz se visualizan seis elementos principales
 Cuando el programa inicia, lo único que se verá será el contador subiendo, la representación del led apagado, y en el cuadro de texto la oración **"WAIT COMMANDS"**. Si se presiona el botón `ON`, el led se encenderá, y en el cuadro de texto dirá **"LED = ON"**; y se se presiona `OFF`, viceversa. Al presionar `READ` sin embargo, el cuadro de texto mostrará el número en el que se encontraba el contador al presionar dicho botón, y al lado el estado actual del led (ON/OFF).
 
 # TRABAJO FINAL
-Tu equipo ha sido contratado para desarrollar una aplicación del área de educación financiera en la modalidad de **Scape Room**, donde una aplicación correrá en el PC y la otra en el microcontrolador.  Debes relacionar *variables* de tipo *ambiental* con variables de tipo *psicológico* que permitan aprendizajes financieros.
+Tu equipo ha sido contratado para desarrollar una aplicación del área de educación financiera en la modalidad de **Escape Room**, donde una aplicación correrá en el PC y la otra en el microcontrolador.  Debes relacionar *variables* de tipo *ambiental* con variables de tipo *psicológico* que permitan aprendizajes financieros.
 ####
 Debes construir una **narrativa** de la experiencia y detallar lo que el usuario **debe realizar** y debe tener un propósito de aprendizaje.
 ####
