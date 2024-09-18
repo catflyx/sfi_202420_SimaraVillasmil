@@ -728,6 +728,17 @@ Debes construir una **narrativa** de la experiencia y detallar lo que el usuario
 - Verificar si debe *cambiar* la variable y modificarla en tiempo real, siempre y cuando **esté habilitada para cambiar**b. La función de cambio será simplemente `aumentar en uno el valor previo a la velocidad especificada`.
 - Mantener un `LED funcionando a una frecuencia de 1 Hz`. El objetivo de este LED es que se pueda *verificar de manera visual* que la aplicación en el microcontrolador NUNCA se bloquea. Esto implica que la **señal de activación se genera en el PC**.
 ###
+_________________________________________________________________________________________________________________________________________________________________________
+####
+#### Nombre del Escape Room
+"El Reto Financiero Familiar"
+
+#### Historia y Objetivo
+Los jugadores son hijos que desean pedir dinero a sus padres para una actividad especial (por ejemplo, un viaje, una consola de videojuegos, o un proyecto personal). Sin embargo, sus padres se niegan a darles el dinero hasta que demuestren tener un buen conocimiento sobre la gestión financiera. Los participantes deben superar una serie de desafíos financieros que los padres han preparado para demostrar que pueden manejar el dinero de manera responsable. Solo si completan todas las pruebas con éxito, obtendrán la "aprobación financiera" de sus padres y podrán obtener el dinero.
+
+- *Estructura del Escape Room*
+ Habrán 4 etapas, cada una centrada en un aspecto clave de la educación financiera, pero adaptada al contexto de la historia familiar.
+###
 Código del controlador:
 ``` c++
 
