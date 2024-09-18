@@ -745,7 +745,175 @@ Código del controlador:
 ```
 Código del PC:
 ``` c++
+using UnityEngine;
+using System.IO.Ports;
+using TMPro;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
+using System.Threading.Tasks;
+using System;
+using static Unity.Burst.Intrinsics.Arm;
 
+enum TaskState2
+{
+    INIT,
+    WAIT_COMMANDS
+}
+
+public class Serial2 : MonoBehaviour
+{
+
+    private static TaskState taskState = TaskState.INIT;
+    private SerialPort _serialPort;
+    private byte[] buffer;
+    
+    public TextMeshProUGUI textbox; private string box;
+    public GameObject Qbox;
+    public TextMeshProUGUI textQ; private string question;
+
+    public GameObject ButtonA; public GameObject ButtonB; public GameObject ButtonC; public GameObject ButtonD; public GameObject ButtonE;
+
+    static bool next; static string[] Atext = new string[40]; static int cont;
+    static string[] Btext = new string[20]; static int cont2;
+
+    static char respuesta;
+
+    void Start()
+    {
+        _serialPort = new SerialPort();
+        _serialPort.PortName = "COM4";
+        _serialPort.BaudRate = 115200;
+        _serialPort.DtrEnable = true;
+        _serialPort.NewLine = "\n";
+        _serialPort.Open();
+        Debug.Log("Open Serial Port");
+        buffer = new byte[128];
+
+        Qbox.SetActive(true); next = false; cont = 0;
+
+        ButtonA.SetActive(false); ButtonB.SetActive(false); ButtonC.SetActive(false); ButtonD.SetActive(false); ButtonE.SetActive(false);
+
+        Atext[0] = "Los jugadores son hijos que desean pedir dinero a sus padres para una actividad especial (por ejemplo, un viaje, una consola de videojuegos, o un proyecto personal).";
+        Atext[1] = "Sin embargo, sus padres se niegan a darles el dinero hasta que demuestren tener un buen conocimiento sobre la gestión financiera.";
+        Atext[2] = "Los participantes deben superar una serie de desafíos financieros que los padres han preparado para demostrar que pueden manejar el dinero de manera responsable.";
+        Atext[3] = "Solo si completan todas las pruebas con éxito, obtendrán la \"aprobación financiera\" de sus padres y podrán obtener el dinero.";
+        Atext[4] = ". . . Empezemos.";
+        //ETAPA 1
+        Atext[5] = "Los jugadores tienen un presupuesto total de 5 millones pesos para el viaje, distribuidos en una tarjeta de débito y cuatro tarjetas de crédito.";
+        Atext[6] = "Deben organizar y optimizar sus gastos para aprovechar al máximo su presupuesto y al final de pagar todos los gastos deben de quedar más de 500 mil pesos para emergencias.";
+        Atext[7] = "Distribución del Dinero en las Tarjetas (Modificada):";
+        Atext[8] = " ¬ Tarjeta de Débito: 2,000,000 COP\n ¬ Tarjeta de Crédito A (Tasa Alta, Sin Beneficios): 500,000 COP\n ¬ Tarjeta de Crédito B (Tasa Media, Cashback en Alimentación): 500,000 COP\n ¬ Tarjeta de Crédito C (Tasa Alta, Descuentos en Viajes): 1,500,000 COP\n ¬ Tarjeta de Crédito D (Tasa Media, Beneficios en Compras en Línea): 500,000 COP\n";
+        Atext[9] = "..";
+        Atext[10] = "..";
+        Atext[11] = " a) Tarjeta de Débito\n b) Tarjeta de Crédito A\n c) Tarjeta de Crédito B\n d) Tarjeta de Crédito C\n e) Tarjeta de Crédito D\n";
+        Atext[12] = "Te equivocaste, vuelve a intentar.";
+        Atext[13] = "¡Bien hecho! Continuemos. . .";
+        //ETAPA 2
+        Atext[14] = "Los padres le dan al niño 20,000 COP a la semana como mesada. El niño tiene varios deseos: quiere comprar una bicicleta, un nuevo control para su consola y un juguete bay.";
+        Atext[15] = "Sin embargo, debe aprender a ahorrar y planificar sus gastos para poder comprar estos objetos sin gastar más de lo que tiene.";
+        Atext[16] = "Los padres le han dicho que debe demostrar una buena capacidad de ahorro antes de darle el dinero.";
+        Atext[17] = "Detalles Iniciales:";
+        Atext[18] = " ¬ Ingreso semanal: 20,000 COP\r\n ¬ Gastos semanales: Se presentan 4 gastos recurrentes que el niño tiene cada semana.\r\n ¬ Objetos a comprar y sus costos:\r\n ¬ Bicicleta: 100,000 COP\r\n ¬ Control de consola: 70,000 COP\r\n ¬ Bay: 50,000 COP\r\n ¬ Regla de Emergencias: El 20% de lo que no se gaste durante la semana se debe reservar para emergencias y no se puede usar para ahorro.";
+        Atext[19] = "..";
+        Atext[20] = "..";
+        Atext[21] = "Line21";
+        Atext[22] = "Line22";
+        Atext[23] = "Line23";
+
+        //
+
+        Btext[0] = "El Reto Financiero Familiar";
+        Btext[1] = "Etapa 1: El Presupuesto para el Viaje";
+        Btext[2] = "Etapa 2: Ahorro para Comprar lo Deseado";
+        Btext[3] = "Etapa 3: Decidiendo Dónde Invertir la Mesada";
+        Btext[4] = "Line5";
+        Btext[5] = "Line6";
+    }
+
+    void Update()
+    {
+        box = Atext[cont];
+        textbox.text = box;
+
+        question = Btext[cont2];
+        textQ.text = question;
+
+        switch (taskState)
+        {
+            case TaskState.INIT:
+                taskState = TaskState.WAIT_COMMANDS;
+                Debug.Log("BEGIN");
+                break;
+            case TaskState.WAIT_COMMANDS:
+                if (_serialPort.BytesToRead > 0)
+                {
+                    string response = _serialPort.ReadLine();
+                    Debug.Log(response);
+                }
+                break;
+            default:
+                Debug.Log("State Error");
+                box = "ERROR";
+                break;
+        }
+
+        if (next)
+        {
+            cont++; next = false;
+            if ((cont-1) == 12)
+            {
+                cont = 5; cont2 = 1;
+            }
+        }
+
+        if (cont == 5)
+        {
+            cont2 = 1;
+        }
+        if (cont == 11)
+        {
+            ButtonA.SetActive(true); ButtonB.SetActive(true); ButtonC.SetActive(true); ButtonD.SetActive(true); ButtonE.SetActive(true);
+        }
+
+        if (cont == 12)
+        {
+            ButtonA.SetActive(false); ButtonB.SetActive(false); ButtonC.SetActive(false); ButtonD.SetActive(false); ButtonE.SetActive(false);
+            switch (respuesta)
+            {
+                case 'a': cont = 13;  break;
+                default: cont = 12; break;
+            }
+        }
+        if (cont == 14)
+        {
+            cont2 = 2;
+        }
+    }
+
+    public void A()
+    {
+        respuesta = 'a'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void B()
+    {
+        respuesta = 'b'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void C()
+    {
+        respuesta = 'c'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void D()
+    {
+        respuesta = 'd'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void E()
+    {
+        respuesta = 'e'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void NEXT()
+    {
+        next = true; Debug.Log("Passed to next -> text");
+    }
+}
 ```
 #### Interfaz
 
