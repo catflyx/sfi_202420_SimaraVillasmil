@@ -39,18 +39,76 @@ Cuando trabajamos con protocolos binarios es necesario transmitir variables que 
 Algo que debemos decidir al trabajar con números como los anteriormente descritos es el orden en el cual serán transmitidos sus bytes. En principio tenemos dos posibilidades: i) transmitir primero el byte de menor peso (*little endian*) o transmitir primero el byte de mayor peso (*big endian*). Por lo tanto, al diseñar un protocolo binario se debe escoger una de las dos posibilidades.
 
 # Ejercicio 4
-<aside>
+```
 **¡Desempolva ScriptCommunicator!**
-
 Para este ejercicio vas a necesitar una herramienta que te permita ver los bytes que se están transmitiendo sin interpretarlos como caracteres ASCII. Usa **ScriptCommunicator** en los sistemas operativos Windows o Linux y **CoolTerm** en el sistema operativo MacOS (te soporta la arquitectura Mx).
-
-</aside>
-
+```
 ¿Cómo transmitir un número en punto flotante? Veamos dos alternativas:
 ####
 Opción 1:
 ``` c++
+void setup() {
+    Serial.begin(115200);
+}
 
+void loop() {
+    // 45 60 55 d5
+    // https://www.h-schmidt.net/FloatConverter/IEEE754.html
+    static float num = 3589.3645;
+
+    if(Serial.available()){
+        if(Serial.read() == 's'){
+            Serial.write ( (uint8_t *) &num,4);
+        }
+    }
+}
+```
+Opción 2:
+``` c++
+void setup() {
+    Serial.begin(115200);
+}
+
+void loop() {
+// 45 60 55 d5// https://www.h-schmidt.net/FloatConverter/IEEE754.htmlstatic float num = 3589.3645;
+static uint8_t arr[4] = {0};
+
+if(Serial.available()){
+if(Serial.read() == 's'){
+            memcpy(arr,(uint8_t *)&num,4);
+            Serial.write(arr,4);
+        }
+    }
+}
+```
+Aquí primero se copia la información que se desea transmitir a un buffer o arreglo:
+####
+Preguntas:
+- ¿En qué *endian* estamos transmitiendo el número?
+
+####
+- Y si queremos transmitir en el *endian* contrario, ¿Cómo se modifica el código?
+
+####
+Pausa… A continuación, te dejo una posible solución a la pregunta anterior.
+``` c++
+void setup() {
+    Serial.begin(115200);
+}
+
+void loop() {
+// 45 60 55 d5// https://www.h-schmidt.net/FloatConverter/IEEE754.htmlstatic float num = 3589.3645;
+static uint8_t arr[4] = {0};
+
+if(Serial.available()){
+if(Serial.read() == 's'){
+            memcpy(arr,(uint8_t *)&num,4);
+for(int8_t i = 3; i >= 0; i--){
+              Serial.write(arr[i]);
+            }
+        }
+    }
+}
 ```
 
 # Ejercicio 5
@@ -63,12 +121,84 @@ Programa el controlador con este código:
 ```
 
 # Ejercicio 6
-Texto
-
+En este punto, te pido que repases, bien sea desde lo expuesto en la unidad anterior o remitiéndose a la documentación de C# de Microsoft.
 ####
-Programa el controlador con este código:
+**¿Para qué sirven los siguientes tres fragmentos de código y qué están haciendo?**
+``` c++
+SerialPort _serialPort =new SerialPort();
+_serialPort.PortName = "/dev/ttyUSB0";
+_serialPort.BaudRate = 115200;
+_serialPort.DtrEnable =true;
+_serialPort.Open();
+```
+``` c++
+byte[] data = { 0x01, 0x3F, 0x45};
+_serialPort.Write(data,0,1);
+```
+``` c++
+byte[] buffer =new byte[4];
+.
+.
+.
+
+if(_serialPort.BytesToRead >= 4){
+
+    _serialPort.Read(buffer,0,4);
+for(int i = 0;i < 4;i++){
+        Console.Write(buffer[i].ToString("X2") + " ");
+    }
+}
+```
+....
+####
+Inventa una aplicación en Unity que utilice TODOS los métodos anteriores. Ten presente que necesitarás, además, inventar también la aplicación del microcontrolador.
+####
+#### Códigos
+Controlador:
 ``` c++
 
 ```
+Unity:
+``` c++
+
+```
+#### Interfaz
+
+
+### *¿Cómo funciona?*
+
 
 # RETO
+Vas a enviar 2 números en punto flotante desde un microcontrolador a una aplicación en Unity usando comunicaciones binarias. Además, inventa una aplicación en Unity que modifique dos dimensiones de un game object usando los valores recibidos.
+####
+Te voy a dejar una ayuda. Revisar el siguiente fragmento de código… *¿Qué hace?*
+``` c++
+byte[] buffer = new byte[4];
+.
+.
+.
+if(_serialPort.BytesToRead >= 4){
+  _serialPort.Read(buffer,0,4);
+  Console.WriteLine(System.BitConverter.ToSingle(buffer,0));
+```
+Presta especial atención System.BitConverter.ToSingle. Ahora, te pediré que busques en la documentación de Microsoft de C# qué más te ofrece System.BitConverter.
+#### Códigos
+Controlador:
+``` c++
+
+```
+Unity:
+``` c++
+
+```
+#### Interfaz
+
+
+### *¿Cómo funciona?*
+
+
+
+
+
+
+
