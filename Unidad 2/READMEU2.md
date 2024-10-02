@@ -741,7 +741,7 @@ Los jugadores son hijos que desean pedir dinero a sus padres para una actividad 
 ###
 Código del controlador:
 ``` c++
-
+Igual al ejercicio 4 (No se pudo conectar apropiadamente otro código)
 ```
 Código del PC:
 ``` c++
@@ -915,12 +915,311 @@ public class Serial2 : MonoBehaviour
     }
 }
 ```
+Versión del Unity package:
+```
+using UnityEngine;
+using System.IO.Ports;
+using TMPro;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
+using System.Threading.Tasks;
+using System;
+// UnityEngine.UI;
+using UnityEngine.Apple;
+
+enum TaskState2
+{
+    INIT,
+    WAIT_COMMANDS
+}
+
+
+
+public class Serial2 : MonoBehaviour
+{
+
+    // Añadir una referencia a changeselect
+    public changeselect changeSelectInstance;
+
+    private static TaskState2 taskState = TaskState2.INIT;
+    private SerialPort _serialPort;
+    private byte[] buffer;
+
+    public TextMeshProUGUI textbox; private string box;
+    public GameObject Qbox;
+    public TextMeshProUGUI textQ; private string question;
+
+    public GameObject ButtonA; public GameObject ButtonB; public GameObject ButtonC; public GameObject ButtonD; public GameObject ButtonE;
+
+    static bool next; static string[] Atext = new string[50];
+    private static int cont; 
+    static string[] Btext = new string[20]; static int cont2;
+
+    static char respuesta;
+
+    public TextMeshProUGUI timer;
+    private int s = 0; private float sm = 0; private int m = 0; private int countdown = 0; private string cero = "0";
+
+    void Start()
+    {
+        _serialPort = new SerialPort();
+        _serialPort.PortName = "COM4";
+        _serialPort.BaudRate = 115200;
+        _serialPort.DtrEnable = true;
+        _serialPort.NewLine = "\n";
+        _serialPort.Open();
+        Debug.Log("Open Serial Port");
+        buffer = new byte[128];
+
+        Qbox.SetActive(true); next = false; cont = 0;
+
+        ButtonA.SetActive(false); ButtonB.SetActive(false); ButtonC.SetActive(false); ButtonD.SetActive(false); ButtonE.SetActive(false);
+
+        //
+        // Función para enviar el dato usuario a través del puerto serial
+
+
+
+        //
+
+        Atext[0] = "Los jugadores son hijos que desean pedir dinero a sus padres para una actividad especial (por ejemplo, un viaje, una consola de videojuegos, o un proyecto personal).";
+        Atext[1] = "Sin embargo, sus padres se niegan a darles el dinero hasta que demuestren tener un buen conocimiento sobre la gestión financiera.";
+        Atext[2] = "Los participantes deben superar una serie de desafíos financieros que los padres han preparado para demostrar que pueden manejar el dinero de manera responsable.";
+        Atext[3] = "Solo si completan todas las pruebas con éxito, obtendrán la \"aprobación financiera\" de sus padres y podrán obtener el dinero.";
+        Atext[4] = ". . . Empecemos";
+
+        //ETAPA 1
+        Atext[5] = "Presupuesto Total y Métodos de Pago:\r\nLos participantes tendrán su presupuesto total dividido en tres tarjetas, cada una con diferentes características. Deben elegir cuál usar para cada compra, tomando en cuenta los beneficios o desventajas que ofrece cada método de pago.";
+        Atext[6] = "Tarjeta de Débito:\r\nCantidad disponible: 500.000 COP\r\nCaracterísticas: El dinero sale inmediatamente del presupuesto sin ningún costo adicional.";
+        Atext[7] = "Tarjeta de Crédito (con descuento en algunas compras):\r\nCantidad disponible: 400.000 COP\r\nCaracterísticas: Esta tarjeta ofrece un 10% de descuento en las compras de Entretenimiento y Souvenirs.";
+        Atext[8] = "Tarjeta de Crédito (sin descuento, pero con intereses bajos):\r\nCantidad disponible: 300.000 COP\r\nCaracterísticas: No ofrece descuentos, pero tiene intereses bajos (5%) si se usa.";
+        
+        Atext[9] = "Tiempo Base:\r\nTemperatura normal (<30°C): Tienen 5 minutos (300 segundos) para completar la etapa.\r\nTemperatura alta (>30°C): El tiempo se reduce a 3 minutos (180 segundos) debido a la irritabilidad y presión ambiental.";
+        Atext[10] = "Modificaciones al Tiempo:\r\nCompra de refrescos: Cada refresco comprado añade 10 segundos adicionales al tiempo total, permitiendo tomar decisiones más calmadas.";
+        Atext[11] = "Condiciones de Éxito:\r\nDeben gestionar bien los tres métodos de pago para dejar al menos 500.000 COP para emergencias.\r\nSi usan mal las tarjetas o no aprovechan los descuentos, podrían exceder el presupuesto o generar intereses innecesarios.";
+        Atext[12] = "Lista de Compras:\r\nLos participantes deben asignar su presupuesto a diferentes necesidades y lujos durante el viaje. Dependiendo de sus decisiones, podrían quedarse sin suficiente dinero para las compras importantes.";
+
+        Atext[13] = "Comida básica:\r\nPrecio: 300.000 COP (pago con cualquier tarjeta).\r\nDescripción: Necesaria para todo el viaje. Es obligatorio que la compren.";
+        Atext[14] = "Bebidas refrescantes:\r\nPrecio por refresco: 50.000 COP (pago con cualquier tarjeta).\r\nDescripción: Opcional. Los participantes pueden decidir cuántos refrescos comprar. Cada refresco comprado otorga 10 segundos adicionales al tiempo.";
+        Atext[15] = "Entretenimiento (actividades recreativas):\r\nPrecio: 400.000 COP (10% de descuento si se paga con la tarjeta de crédito con descuentos, lo que reduce el costo a 360.000 COP).\r\nDescripción: Actividades recreativas, opcional. Solo se obtiene el descuento si se usa la tarjeta con beneficio.";
+        Atext[16] = "Souvenirs:\r\nPrecio: 200.000 COP (10% de descuento si se paga con la tarjeta de crédito con descuentos, lo que reduce el costo a 180.000 COP).\r\nDescripción: Opcional.";
+        Atext[17] = "Transporte local:\r\nPrecio: 300.000 COP (pago con cualquier tarjeta).\r\nDescripción: Necesario para moverse durante el viaje. Es obligatorio.";
+        Atext[18] = "..";
+        Atext[19] = "..";
+        Atext[20] = "..";
+        Atext[21] = " a) Tarjeta de Débito\n b) ..";
+        Atext[22] = "Te equivocaste, vuelve a intentar.";
+        Atext[23] = "¡Bien hecho! Continuemos. . .";
+
+        //ETAPA 2
+        Atext[20] = "Los participantes deben revisar una serie de ofertas de crédito e inversión.";
+        Atext[20] = "La tarea parece simple, pero el ambiente de trabajo puede influir en su capacidad de concentración. La iluminación ambiental juega un papel crucial: demasiada luz o muy poca puede afectar tanto el tiempo como la calidad de las decisiones financieras que tomen.";
+        Atext[20] = "En condiciones de baja luz, los jugadores comienzan a experimentar fatiga visual y falta de concentración, lo que lleva a más distracción y mayor probabilidad de errores.";
+        
+        Atext[20] = "Condiciones del entorno:";
+        Atext[20] = "Luz adecuada:\r\nDescripción: La iluminación es perfecta para la tarea. Los jugadores tienen un ambiente cómodo donde pueden concentrarse mejor en los detalles de las ofertas financieras.\r\nTiempo disponible: 7 minutos para analizar las ofertas de crédito e inversión.";
+        Atext[20] = "Luz baja:\r\nDescripción: La iluminación es insuficiente, lo que genera fatiga visual y distracción. Si bien tienen más tiempo, la calidad de su concentración disminuye significativamente.\r\nTiempo disponible: 9 minutos para analizar las ofertas, pero con una penalización de fatiga que aumenta la probabilidad de errores.";
+        Atext[20] = "Los participantes recibirán una tabla con diferentes ofertas de crédito e inversiones , y deberán seleccionar las mejores opciones en función de los intereses, plazos y riesgos involucrados. Sin embargo, las ofertas tienen detalles que pueden pasar por alto si no están lo suficientemente concentradas.";
+        
+        Atext[20] = "Ofertas para analizar:";
+        Atext[20] = "Crédito personal:\r\nInterés bajo pero largo plazo (10 años).\r\nIdeal para aquellos que no necesitan el dinero inmediatamente pero quieren reducir los pagos mensuales.";
+        Atext[20] = "Préstamo Rápido:\r\nInterés alto, plazo corto (6 meses).\r\nConveniente para emergencias, pero con un costo elevado en intereses.\r\nInversión de Alto Riesgo: Alto potencial de retorno.\r\nIdeal para quienes obtienen ganancias rápidas, pero con un riesgo considerable de pérdida.";
+        Atext[20] = "Inversión Conservadora:\r\n\r\nRetorno seguro, bajo crecimiento.\r\nPerfecta para aquellos que prefieren no arriesgar su capital.";
+        Atext[20] = "Los jugadores deben elegir el mejor equilibrio entre riesgo y beneficio, tomando decisiones basadas en la información que tienen.";
+        Atext[20] = "..";
+        Atext[20] = "..";
+
+        //ETAPA 3
+        Atext[20] = "Los jugadores deben gestionar su presupuesto mensual para ahorrar lo suficiente y comprar un artículo importante.";
+        Atext[20] = "Sin embargo, la tarea se complica por la presión ambiental causada por los niveles de humedad, lo que afecta su capacidad para tomar decisiones rápidas al cubrir sus necesidades básicas.";
+        Atext[20] = "Artículo para comprar:\r\nArtículo Deseado: Un teléfono móvil de 250.000 COP .\r\nMeta de ahorro: Los jugadores deben ahorrar 30.000 COP por mes para alcanzar la meta en 9 meses, pero cualquier gasto innecesario afectará su capacidad de ahorro.";
+        Atext[20] = "Variables:";
+        Atext[20] = "Variable Ambiental: Nivel de humedad (medido con un sensor de humedad).\r\nSi la humedad es alta, los jugadores sienten incomodidad, lo que limita su capacidad de tomar decisiones de manera óptima.";
+        Atext[20] = "Condiciones del entorno:";
+        Atext[20] = "Humedad moderada (baja humedad):\r\nDescripción: El ambiente es cómodo, con humedad en un nivel óptimo.\r\nTiempo para decidir el precio de los gastos básicos: 6 segundos .";
+        Atext[20] = "Humedad alta:\r\nDescripción: El ambiente es sofocante y la humedad genera incomodidad, lo que afecta la capacidad de pensar claramente.\r\nTiempo para decidir el precio de los gastos básicos: 3 segundos , lo que incrementa el riesgo de elegir un precio más alto ";
+        Atext[20] = "El objetivo sigue siendo ahorrar lo suficiente cada mes para comprar un artículo importante, pero cada vez que los jugadores se enfrenten a un gasto esencial (como alimentación, transporte o entretenimiento), se les presentarán tres posibles precios.y tendrán";
+        
+        Atext[20] = "Gastos Esenciales:\r\n";
+        Atext[20] = "Alimentación:\r\nOpción 1: 35.000 COP\r\nOpción 2: 40.000 COP\r\nOpción 3: 45.000 COP";
+        Atext[20] = "Transporte:\r\nOpción 1: 15.000 COP\r\nOpción 2: 20.000 COP\r\nOpción 3: 25.000 COP\r\n";
+        Atext[20] = "Entretenimiento:\r\nOpción 1: 8.000 COP\r\nOpción 2: 10.000 COP\r\nOpción 3: 12.000 COP";
+        Atext[20] = "..";
+        Atext[20] = "..";
+
+        //ETAPA 4
+        Atext[20] = "..";
+        Atext[20] = "..";
+        Atext[20] = "..";
+        Atext[20] = "..";
+        Atext[20] = "..";
+        Atext[20] = "..";
+        Atext[20] = "..";
+
+        //
+
+        Btext[0] = "El Reto Financiero Familiar";
+        Btext[1] = "Etapa 1: El Clima y la Toma de Decisiones";
+        Btext[2] = "Etapa 2: Luz y concentración";
+        Btext[3] = "Etapa 3: Humedad y Decisiones bajo Presión";
+        Btext[4] = "Etapa 4: . . .";
+        Btext[5] = "¡Prueba terminada!";
+    }
+
+    void Update()
+    {
+        changeSelectInstance.SetCount(cont);
+        // Reciba cosas del Port
+        if (_serialPort.IsOpen && _serialPort.BytesToRead > 0)
+        {
+            string response = _serialPort.ReadLine();
+            Debug.Log(response);
+        }
+
+        // Contador de tiempo
+        if (cont == 21 || cont == 40)
+        {
+            timer.text = m.ToString() + ":" + cero + s.ToString();
+            sm += Time.deltaTime; s = Convert.ToInt32(sm);
+
+            int timeLeft = Mathf.Max(0, Mathf.FloorToInt(countdown - s));
+
+            if (s > 9.99)
+            {
+                cero = "";
+            }
+            if (s > 59.99)
+            {
+                m++; sm = 0; cero = "0";
+            }
+        }
+        else
+        {
+            sm = 0; cero = "0"; m = 0;
+            s = Convert.ToInt32(sm);
+            timer.text = m.ToString() + ":" + cero + s.ToString();
+        }
+
+        // Cajas de texto
+        box = Atext[cont];
+        textbox.text = box;
+
+        question = Btext[cont2];
+        textQ.text = question;
+
+        // TASKSTATE
+        switch (taskState)
+        {
+            case TaskState2.INIT:
+                taskState = TaskState2.WAIT_COMMANDS;
+                Debug.Log("BEGIN");
+                break;
+            case TaskState2.WAIT_COMMANDS:
+                if (_serialPort.BytesToRead > 0)
+                {
+                    string response = _serialPort.ReadLine();
+                    Debug.Log(response);
+                }
+                break;
+            default:
+                Debug.Log("State Error");
+                box = "ERROR";
+                break;
+        }
+
+        // NEXT()
+        if (next)
+        {
+            cont++; next = false;
+            /*if ((cont - 1) == 12)
+            {
+                cont = 5; cont2 = 1;
+            }*/
+
+            Debug.Log("Passed to next -> text : " + cont);
+        }
+
+        if (cont == 30)
+        {
+            cont2 = 1;
+        }
+        if (cont == 21)
+        {
+            ButtonA.SetActive(true); ButtonB.SetActive(true); ButtonC.SetActive(true); ButtonD.SetActive(true); ButtonE.SetActive(true);
+        }
+
+        if (cont == 22)
+        {
+            ButtonA.SetActive(false); ButtonB.SetActive(false); ButtonC.SetActive(false); ButtonD.SetActive(false); ButtonE.SetActive(false);
+            switch (respuesta)
+            {
+                case 'a': cont = 13; break;
+                default: cont = 12; break;
+            }
+        }
+        if (cont == 30)
+        {
+            cont2 = 2;
+        }
+    }
+
+    public void EnviarDatoUsuario(string datousuario)
+    {
+        if (_serialPort.IsOpen)
+        {
+            _serialPort.WriteLine(datousuario);
+            Debug.Log("Dato enviado: " + datousuario);
+        }
+        else
+        {
+            Debug.LogError("Puerto serial no está abierto");
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (_serialPort.IsOpen)
+        {
+            _serialPort.Close();
+            Debug.Log("Puerto serial cerrado");
+        }
+    }
+
+    public void A()
+    {
+        respuesta = 'a'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void B()
+    {
+        respuesta = 'b'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void C()
+    {
+        respuesta = 'c'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void D()
+    {
+        respuesta = 'd'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void E()
+    {
+        respuesta = 'e'; Debug.Log("respuesta = " + respuesta);
+    }
+    public void NEXT()
+    {
+        next = true;
+    }
+}
+```
 #### Interfaz
-
+![image](https://github.com/user-attachments/assets/9cfbc5d9-6292-4478-9abc-98302b5b4cd5)
+(todo activo)
 ####
-### *¿Cómo funciona?*
-...
+### *¿Cómo planeamos que funcionará?*
+Al darle `Start`, se usará el botón de '->' para pasar el texto en el `text box`, en el cuál le dará toda la información. El juego se divide en **4 unidades**, y al acabar cada unidad, se hará una pregunta y se activarán los botones de respuesta: `a`, `b`, `c`, `d` y `e`. Al mismo tiempo, se activará un temporizador. Si el tiempo se acaba o termina el tiempo, se empieza la unidad actual denuevo. Si la respuesta es correcta, pasa a la siguiente.
 
+Además, antes de responder las preguntas, se activará la caja de *`ingresar texto...`*, esta será para ingresar qué variables se cambiarán desde Unity al controlador, y luego se procederá a responder las preguntas.
+
+El programa termina cuando se acaban las 4 unidadaes.
 
 
 
