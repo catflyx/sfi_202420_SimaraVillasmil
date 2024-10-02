@@ -6,17 +6,20 @@ ________________________________________________________________________________
 ####
 Durante la lectura, intenta dar respuestas a las siguientes preguntas:
 - ¿Cómo se ve un protocolo binario?
-Es una serie de bits que representan ciertos tipos de información, siendo por lo general de 8 bits o más (1 byte o más). De esta forma, cada byte puede almacenar una información específica, con valores diferentes que varían desde 0 a 255 bytes.
 ####
+Es una serie de bits que representan ciertos tipos de información, siendo por lo general de 8 bits o más (1 byte o más). De esta forma, cada byte puede almacenar una información específica, con valores diferentes que varían desde 0 a 255 bytes.
+
 - ¿Puedes describir las partes de un mensaje?
+####
 1. **Cabecera (`Header`):**
 La cabecera generalmente contiene información sobre el mensaje en sí, como el tipo de mensaje, el tamaño de los datos y la dirección del dispositivo que envía o recibe.
 2. **Cuerpo (`Payload`):**
 Esta es la parte principal del mensaje que contiene los datos útiles que se quieren transmitir, como lecturas del sensor, configuraciones o comandos.
 3. **Pie (`Footer` o CRC):**
 Puede incluir un código de verificación (Checksum o CRC) para asegurar la integridad del mensaje. A veces, también puede incluir una señal de finalización.
-####
+
 - ¿Para qué sirve cada parte del mensaje?
+####
 El `Header` sirve como forma de identificar qué tipo de mensaje se envía y su propósito, siendo generalmente fundamental para que se lea correctamente el mensaje. El `Payload` contiene la información que se desea transmitir, y es por así decirlo la carga de relevancia o lo que se quiere extraer del mensaje. Finalmente, el `Footer` contiene códigos de que sirvan para verificar que el mensaje ha sido recibido de forma idónea y que no hayan ocurrido errores.
 
 # Ejercicio 2
@@ -85,11 +88,13 @@ Aquí primero se copia la información que se desea transmitir a un buffer o arr
 ####
 Preguntas:
 - ¿En qué *endian* estamos transmitiendo el número?
-
 ####
+...
+
 - Y si queremos transmitir en el *endian* contrario, ¿Cómo se modifica el código?
-
 ####
+...
+
 Pausa… A continuación, te dejo una posible solución a la pregunta anterior.
 ``` c++
 void setup() {
@@ -112,10 +117,9 @@ for(int8_t i = 3; i >= 0; i--){
 ```
 
 # Ejercicio 5
-Texto
-
+Ahora te voy a pedir que practiques. La idea es que transmitas dos números en punto flotante en ambos endian.
 ####
-Programa el controlador con este código:
+Envía tres números en punto flotante.
 ``` c++
 
 ```
