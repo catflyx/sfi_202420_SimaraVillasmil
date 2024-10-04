@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/ba39687a-c7ea-47e6-8756-af3438db3ef4)![image](https://github.com/user-attachments/assets/95b1047d-4624-4192-9655-d02b38c7daf7)# U N I D A D  3
+# U N I D A D  3
 Protocolos dinarios
 _________________________________________________________________________________________________________________________________________________________________________________________
 # Ejercicio 1
