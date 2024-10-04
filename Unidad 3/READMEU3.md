@@ -1,4 +1,4 @@
-# U N I D A D  3
+![image](https://github.com/user-attachments/assets/ba39687a-c7ea-47e6-8756-af3438db3ef4)![image](https://github.com/user-attachments/assets/95b1047d-4624-4192-9655-d02b38c7daf7)# U N I D A D  3
 Protocolos dinarios
 _________________________________________________________________________________________________________________________________________________________________________________________
 # Ejercicio 1
@@ -41,11 +41,12 @@ Cuando trabajamos con protocolos binarios es necesario transmitir variables que 
 
 Algo que debemos decidir al trabajar con números como los anteriormente descritos es el orden en el cual serán transmitidos sus bytes. En principio tenemos dos posibilidades: i) transmitir primero el byte de menor peso (*little endian*) o transmitir primero el byte de mayor peso (*big endian*). Por lo tanto, al diseñar un protocolo binario se debe escoger una de las dos posibilidades.
 
+Si es *Little endian* se envía lo de la derecha primero, y si es *Big endian* lo de la izquierda.
+
 # Ejercicio 4
-```
 **¡Desempolva ScriptCommunicator!**
 Para este ejercicio vas a necesitar una herramienta que te permita ver los bytes que se están transmitiendo sin interpretarlos como caracteres ASCII. Usa **ScriptCommunicator** en los sistemas operativos Windows o Linux y **CoolTerm** en el sistema operativo MacOS (te soporta la arquitectura Mx).
-```
+
 ¿Cómo transmitir un número en punto flotante? Veamos dos alternativas:
 ####
 Opción 1:
@@ -61,7 +62,7 @@ void loop() {
 
     if(Serial.available()){
         if(Serial.read() == 's'){
-            Serial.write ( (uint8_t *) &num,4);
+            Serial.write ( (uint8_t *) &num,4); //Que chuchas pasa acá
         }
     }
 }
@@ -73,7 +74,8 @@ void setup() {
 }
 
 void loop() {
-// 45 60 55 d5// https://www.h-schmidt.net/FloatConverter/IEEE754.htmlstatic float num = 3589.3645;
+// 45 60 55 d5// https://www.h-schmidt.net/FloatConverter/IEEE754.htmlstatic
+float num = 3589.3645;
 static uint8_t arr[4] = {0};
 
 if(Serial.available()){
@@ -89,11 +91,11 @@ Aquí primero se copia la información que se desea transmitir a un buffer o arr
 Preguntas:
 - ¿En qué *endian* estamos transmitiendo el número?
 ####
-...
+idk
 
 - Y si queremos transmitir en el *endian* contrario, ¿Cómo se modifica el código?
 ####
-...
+idk
 
 Pausa… A continuación, te dejo una posible solución a la pregunta anterior.
 ``` c++
@@ -102,7 +104,8 @@ void setup() {
 }
 
 void loop() {
-// 45 60 55 d5// https://www.h-schmidt.net/FloatConverter/IEEE754.htmlstatic float num = 3589.3645;
+// 45 60 55 d5// https://www.h-schmidt.net/FloatConverter/IEEE754.htmlstatic
+float num = 3589.3645;
 static uint8_t arr[4] = {0};
 
 if(Serial.available()){
