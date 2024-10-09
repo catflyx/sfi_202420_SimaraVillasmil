@@ -49,7 +49,7 @@ Para este ejercicio vas a necesitar una herramienta que te permita ver los bytes
 
 ¿Cómo transmitir un número en punto flotante? Veamos dos alternativas:
 ####
-Opción 1:
+Opción 1: (sigue sin funcionar bien)
 ``` c++
 void setup() {
     Serial.begin(115200);
@@ -60,12 +60,29 @@ void loop() {
     // https://www.h-schmidt.net/FloatConverter/IEEE754.html
     static float num = 3589.3645;
 
-    if(Serial.available()){
-        if(Serial.read() == 's'){
-            Serial.write ( (uint8_t *) &num,4); //Que chuchas pasa acá
+    if (Serial.available()) {
+        char command = Serial.read();  // Leer un solo carácter
+
+        if (command == 's') {
+            Serial.write((uint8_t *) &num, 4); // Enviar el número original
+        }
+        
+        if (command == 'a') {
+            // Convertir el número a cadena
+            String numStr = String(num);
+            // Invertir la cadena
+            String reversedStr = String();
+            for (int i = numStr.length() - 1; i >= 0; i--) {
+                reversedStr += numStr.charAt(i);
+            }
+
+            // Convertir la cadena invertida de vuelta a float
+            float reversedNum = reversedStr.toFloat();
+
+            // Enviar el número invertido
+            Serial.write((uint8_t *) &reversedNum, 4); // Enviar el número invertido
         }
     }
-}
 ```
 Opción 2:
 ``` c++
@@ -91,13 +108,19 @@ Aquí primero se copia la información que se desea transmitir a un buffer o arr
 Preguntas:
 - ¿En qué *endian* estamos transmitiendo el número?
 ####
-idk
+Big endian, ya que se está leyendo primero el número desde la izquierda.
 
 - Y si queremos transmitir en el *endian* contrario, ¿Cómo se modifica el código?
 ####
 idk
 
 Pausa… A continuación, te dejo una posible solución a la pregunta anterior.
+####
+Opción 2:
+``` c++
+
+```
+Opción 1:
 ``` c++
 void setup() {
     Serial.begin(115200);
@@ -124,7 +147,36 @@ Ahora te voy a pedir que practiques. La idea es que transmitas dos números en p
 ####
 Envía tres números en punto flotante.
 ``` c++
+void setup() {
+    Serial.begin(115200);
+}
 
+void loop() {
+// 45 60 55 d5// https://www.h-schmidt.net/FloatConverter/IEEE754.htmlstatic
+float num = 3589.3645; float num2 = 3647.0957; float num3 = 9460.2130;
+
+static uint8_t arr[4] = {0};
+
+if(Serial.available()){
+if(Serial.read() == 's'){
+            memcpy(arr,(uint8_t *)&num,4);
+            Serial.write(arr,4);
+
+Serial.write('\n');
+
+            memcpy(arr,(uint8_t *)&num2,4);
+            for(int8_t i = 3; i >= 0; i--)
+            {
+              Serial.write(arr[i]); 
+            }
+
+            Serial.write('\n');
+            
+            memcpy(arr,(uint8_t *)&num3,4);
+            Serial.write(arr,4);
+        }
+    }
+}
 ```
 
 # Ejercicio 6
