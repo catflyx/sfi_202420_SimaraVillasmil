@@ -49,6 +49,56 @@ Para este ejercicio vas a necesitar una herramienta que te permita ver los bytes
 
 ¿Cómo transmitir un número en punto flotante? Veamos dos alternativas:
 ####
+Opción 1:
+``` c++
+void setup() {
+    Serial.begin(115200);
+}
+
+void loop() {
+    // 45 60 55 d5
+    // https://www.h-schmidt.net/FloatConverter/IEEE754.html
+    static float num = 3589.3645;
+
+    if(Serial.available()){
+        if(Serial.read() == 's'){
+            Serial.write ( (uint8_t *) &num,4);
+        }
+    }
+}
+```
+Opción 2:
+``` c++
+void setup() {
+    Serial.begin(115200);
+}
+
+void loop() {
+// 45 60 55 d5// https://www.h-schmidt.net/FloatConverter/IEEE754.htmlstatic
+float num = 3589.3645;
+static uint8_t arr[4] = {0};
+
+if(Serial.available()){
+if(Serial.read() == 's'){
+            memcpy(arr,(uint8_t *)&num,4);
+            Serial.write(arr,4);
+        }
+    }
+}
+```
+Aquí primero se copia la información que se desea transmitir a un buffer o arreglo:
+####
+Preguntas:
+- ¿En qué *endian* estamos transmitiendo el número?
+####
+Big endian, ya que se está leyendo primero el número desde la izquierda.
+
+- Y si queremos transmitir en el *endian* contrario, ¿Cómo se modifica el código?
+####
+idk
+
+Pausa… A continuación, te dejo una posible solución a la pregunta anterior.
+####
 Opción 1: (sigue sin funcionar bien)
 ``` c++
 void setup() {
@@ -85,42 +135,6 @@ void loop() {
     }
 ```
 Opción 2:
-``` c++
-void setup() {
-    Serial.begin(115200);
-}
-
-void loop() {
-// 45 60 55 d5// https://www.h-schmidt.net/FloatConverter/IEEE754.htmlstatic
-float num = 3589.3645;
-static uint8_t arr[4] = {0};
-
-if(Serial.available()){
-if(Serial.read() == 's'){
-            memcpy(arr,(uint8_t *)&num,4);
-            Serial.write(arr,4);
-        }
-    }
-}
-```
-Aquí primero se copia la información que se desea transmitir a un buffer o arreglo:
-####
-Preguntas:
-- ¿En qué *endian* estamos transmitiendo el número?
-####
-Big endian, ya que se está leyendo primero el número desde la izquierda.
-
-- Y si queremos transmitir en el *endian* contrario, ¿Cómo se modifica el código?
-####
-idk
-
-Pausa… A continuación, te dejo una posible solución a la pregunta anterior.
-####
-Opción 2:
-``` c++
-
-```
-Opción 1:
 ``` c++
 void setup() {
     Serial.begin(115200);
@@ -184,10 +198,10 @@ En este punto, te pido que repases, bien sea desde lo expuesto en la unidad ante
 ####
 **¿Para qué sirven los siguientes tres fragmentos de código y qué están haciendo?**
 ``` c++
-SerialPort _serialPort =new SerialPort();
+SerialPort _serialPort = new SerialPort();
 _serialPort.PortName = "/dev/ttyUSB0";
 _serialPort.BaudRate = 115200;
-_serialPort.DtrEnable =true;
+_serialPort.DtrEnable = true;
 _serialPort.Open();
 ```
 ``` c++
