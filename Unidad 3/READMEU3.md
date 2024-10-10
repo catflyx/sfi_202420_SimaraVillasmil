@@ -197,6 +197,8 @@ Serial.write('\n');
 En este punto, te pido que repases, bien sea desde lo expuesto en la unidad anterior o remitiéndose a la documentación de C# de Microsoft.
 ####
 **¿Para qué sirven los siguientes tres fragmentos de código y qué están haciendo?**
+####
+Esto es para que Unity detecte el port. <` ✓ `>
 ``` c++
 SerialPort _serialPort = new SerialPort();
 _serialPort.PortName = "/dev/ttyUSB0";
@@ -204,10 +206,12 @@ _serialPort.BaudRate = 115200;
 _serialPort.DtrEnable = true;
 _serialPort.Open();
 ```
+Se envía info al controlador. <` ✓ `>
 ``` c++
 byte[] data = { 0x01, 0x3F, 0x45};
 _serialPort.Write(data,0,1);
 ```
+Pone el mínimo del buffer (4 bytes), y el otro es un if para ver si los bytes que se pueden leer son mayores o igual a 4, y escribirá. <` ✓ `>
 ``` c++
 byte[] buffer =new byte[4];
 .
@@ -227,13 +231,189 @@ for(int i = 0;i < 4;i++){
 Inventa una aplicación en Unity que utilice TODOS los métodos anteriores. Ten presente que necesitarás, además, inventar también la aplicación del microcontrolador.
 ####
 #### Códigos
-Controlador:
+Microcontrolador:
 ``` c++
+String btnState(uint8_t btnState)
+{
+    if(btnState == HIGH)
+    {
+        return "OFF";
+    }
+    else
+        return "ON";
+}
 
+void task()
+{
+    enum class TaskStates
+    {
+        INIT,
+        WAIT_COMMANDS
+    };
+    static TaskStates taskState = TaskStates::INIT;
+    constexpr uint8_t led = 25;
+
+    switch (taskState)
+    {
+        case TaskStates::INIT:
+        {
+            Serial.begin(115200);
+            pinMode(led, OUTPUT);
+            digitalWrite(led, LOW);
+            taskState = TaskStates::WAIT_COMMANDS;
+            break;
+        }
+        case TaskStates::WAIT_COMMANDS:
+        {
+            if (Serial.available() >= 4)
+            {
+              digitalWrite(led, HIGH);
+              Serial.print("Trigger on");
+            }
+            else {
+              Serial.print("Trigger off"); digitalWrite(led, LOW);
+              }
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+}
+
+void setup()
+{
+  task();
+}
+
+void loop()
+{
+  task();
+}
 ```
 Unity:
 ``` c++
+using UnityEngine;
+using System.IO.Ports;
+using TMPro;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
+using System.Threading.Tasks;
+using System;
+using System.Runtime.ConstrainedExecution;
 
+enum TaskState
+{
+    INIT,
+    WAIT_COMMANDS
+}
+
+public class Serial1 : MonoBehaviour
+{
+
+    private static TaskState taskState = TaskState.INIT;
+    private SerialPort _serialPort;
+    private byte[] buffer;
+
+    public GameObject flashlight; bool f; bool c;
+
+    public GameObject shadow;
+
+    private float s = 0f; private float fc = 0; string command = ""; int ss = -1;
+
+    void Start()
+    {
+        _serialPort = new SerialPort();
+        _serialPort.PortName = "COM4";
+        _serialPort.BaudRate = 115200;
+        _serialPort.DtrEnable = true;
+        _serialPort.NewLine = "\n";
+        _serialPort.Open();
+
+        Debug.Log("Open Serial Port");
+        byte[] buffer = new byte[4];
+
+        flashlight.SetActive(false); f = false; c = false;
+        shadow.SetActive(false);
+    }
+
+    void Update()
+    {
+        switch (taskState)
+        {
+            case TaskState.INIT:
+                taskState = TaskState.WAIT_COMMANDS;
+                Debug.Log("WAIT COMMANDS");
+                break;
+            case TaskState.WAIT_COMMANDS:
+                if (_serialPort.BytesToRead >= 4) //cuando la linterna se haya prendido (o intentado) 4 veces.
+                {
+                    _serialPort.Read(buffer, 0, 4);
+                    for (int i = 0; i < 4; i++)
+                    {
+                        //Console.Write(buffer[i].ToString("X2") + " ");
+                        Debug.Log(buffer[i].ToString("X2") + " ");
+                    }
+                    string response = _serialPort.ReadLine();
+                    command = response;
+                }
+                break;
+            default:
+                Debug.Log("State Error");
+                break;
+        }
+
+        if (Input.GetKeyDown("f") && fc <= 0)
+        {
+            flashlight.SetActive(true); f = true; c = false; fc = 1f;
+            Debug.Log("flaslight ON"); ON();
+        }
+        if (f)
+        {
+            s += Time.deltaTime; Debug.Log("flaslight countdowm: " + s);
+        }
+        if (s >= 0.1)
+        {
+            f = false; s = 0;
+            flashlight.SetActive(false);
+            Debug.Log("flaslight OFF"); c = true;
+        }
+        if (c && fc >= 0)
+        {
+            fc -= Time.deltaTime; Debug.Log("flaslight cooldown: " + fc);
+        }
+
+        if (command == "Trigger on")
+        {
+            TRIGGER();
+        }
+    }
+    void ON()
+    {
+        byte[] data = { 0x01, 0x3F, 0x45 };
+        _serialPort.Write(data, 0, 1);
+        Debug.Log("Sended flash");
+    }
+    private void TRIGGER()
+    {
+        float scaleFactor = 1.1f; ss++; shadow.SetActive(true);
+
+        if (ss > 0)
+        {
+            shadow.transform.localScale *= scaleFactor;
+        }
+
+        // Obtener el tamaño de la pantalla en unidades del mundo
+        Vector3 screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
+
+        // Generar coordenadas aleatorias dentro de los límites de la pantalla
+        float randomX = UnityEngine.Random.Range(-screenBounds.x, screenBounds.x);
+        float randomY = UnityEngine.Random.Range(-screenBounds.y, screenBounds.y);
+
+        // Mover el objeto a la posición aleatoria
+        shadow.transform.position = new Vector3(randomX, randomY, 0);
+    }
+}
 ```
 #### Interfaz
 
