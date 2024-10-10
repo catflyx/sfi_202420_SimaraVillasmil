@@ -916,7 +916,7 @@ public class Serial2 : MonoBehaviour
 }
 ```
 Versión del Unity package:
-```
+``` c++
 using UnityEngine;
 using System.IO.Ports;
 using TMPro;
