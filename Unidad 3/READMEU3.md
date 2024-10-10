@@ -265,14 +265,20 @@ void task()
         }
         case TaskStates::WAIT_COMMANDS:
         {
-            if (Serial.available() >= 4)
+            if (Serial.available() > 0)
             {
+              String command = Serial.readStringUntil('\n');
+              
+              if (command == "triggerOn"){
               digitalWrite(led, HIGH);
               Serial.print("Trigger on");
-            }
-            else {
+              }
+              else {
+                if (command == "triggerOff"){
               Serial.print("Trigger off"); digitalWrite(led, LOW);
               }
+              }
+            }
             break;
         }
         default:
@@ -317,7 +323,7 @@ public class Serial1 : MonoBehaviour
 
     public GameObject flashlight; bool f; bool c;
 
-    public GameObject shadow;
+    public GameObject shadow; int test = 0;
 
     private float s = 0f; private float fc = 0; string command = ""; int ss = -1;
 
@@ -348,14 +354,22 @@ public class Serial1 : MonoBehaviour
             case TaskState.WAIT_COMMANDS:
                 if (_serialPort.BytesToRead >= 4) //cuando la linterna se haya prendido (o intentado) 4 veces.
                 {
+                    _serialPort.Write("triggerOn\n");
                     _serialPort.Read(buffer, 0, 4);
                     for (int i = 0; i < 4; i++)
                     {
                         //Console.Write(buffer[i].ToString("X2") + " ");
                         Debug.Log(buffer[i].ToString("X2") + " ");
                     }
-                    string response = _serialPort.ReadLine();
-                    command = response;
+                }
+                else
+                {
+                    if (_serialPort.BytesToRead > 0)
+                    {
+                        _serialPort.Write("triggerOff\n");
+                        string response = _serialPort.ReadLine();
+                        command = response; Debug.Log(command);
+                    }
                 }
                 break;
             default:
@@ -365,12 +379,12 @@ public class Serial1 : MonoBehaviour
 
         if (Input.GetKeyDown("f") && fc <= 0)
         {
-            flashlight.SetActive(true); f = true; c = false; fc = 1f;
-            Debug.Log("flaslight ON"); ON();
+            flashlight.SetActive(true); f = true; c = false; fc = 1f; test++;
+            Debug.Log("flaslight ON: " + test); ON();
         }
         if (f)
         {
-            s += Time.deltaTime; Debug.Log("flaslight countdowm: " + s);
+            s += Time.deltaTime; // Debug.Log("flaslight countdowm: " + s);
         }
         if (s >= 0.1)
         {
@@ -380,10 +394,10 @@ public class Serial1 : MonoBehaviour
         }
         if (c && fc >= 0)
         {
-            fc -= Time.deltaTime; Debug.Log("flaslight cooldown: " + fc);
+            fc -= Time.deltaTime; // Debug.Log("flaslight cooldown: " + fc);
         }
 
-        if (command == "Trigger on")
+        if (command == "Trigger on" || test == 4)
         {
             TRIGGER();
         }
@@ -396,19 +410,28 @@ public class Serial1 : MonoBehaviour
     }
     private void TRIGGER()
     {
-        float scaleFactor = 1.1f; ss++; shadow.SetActive(true);
+        float scaleFactor = 1.1f; ss++; shadow.SetActive(true); test = 0;
+
+        Debug.Log("SHADOW SIZE : " + ss);
 
         if (ss > 0)
         {
             shadow.transform.localScale *= scaleFactor;
         }
 
-        // Obtener el tamaño de la pantalla en unidades del mundo
-        Vector3 screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
+        RandomLocation();
+    }
+    private void RandomLocation()
+    {
+        // Definir los límites manualmente
+        float minX = 12f; // Límite izquierdo
+        float maxX = 800f;  // Límite derecho
+        float minY = 10f; // Límite inferior
+        float maxY = 300f;  // Límite superior
 
-        // Generar coordenadas aleatorias dentro de los límites de la pantalla
-        float randomX = UnityEngine.Random.Range(-screenBounds.x, screenBounds.x);
-        float randomY = UnityEngine.Random.Range(-screenBounds.y, screenBounds.y);
+        // Generar coordenadas aleatorias dentro de los límites definidos
+        float randomX = UnityEngine.Random.Range(minX, maxX);
+        float randomY = UnityEngine.Random.Range(minY, maxY);
 
         // Mover el objeto a la posición aleatoria
         shadow.transform.position = new Vector3(randomX, randomY, 0);
@@ -416,10 +439,12 @@ public class Serial1 : MonoBehaviour
 }
 ```
 #### Interfaz
+La pantalla está completamente oscura, hasta que se enciende la linterna. Después de cierto tiempo aparece una "sombra".
+####
+![image](https://github.com/user-attachments/assets/031907ec-5031-4855-a207-d4fb05f7629c)
 
-
-### *¿Cómo funciona?*
-
+#### *¿Cómo funciona?*
+Al iniciar el usuario será recibido por una pantalla completamente negra, y deberá presionar la tecla 'f' para poder `encender una linterna` por algunos milisegundos. Después de un tiempo, una sombra se podrá ver una "sombra" apareciendo cada vez más cerca. Esta se activa cuando el microcontrolador recibe al menos *4 o más bytes*. Esto hará que se `mueva de lugar` y se `acerque` cada que 4 o más bytes sean enviados.
 
 # RETO
 Vas a enviar 2 números en punto flotante desde un microcontrolador a una aplicación en Unity usando comunicaciones binarias. Además, inventa una aplicación en Unity que modifique dos dimensiones de un game object usando los valores recibidos.
