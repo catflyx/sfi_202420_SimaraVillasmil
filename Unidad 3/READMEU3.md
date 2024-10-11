@@ -198,7 +198,7 @@ En este punto, te pido que repases, bien sea desde lo expuesto en la unidad ante
 ####
 **¿Para qué sirven los siguientes tres fragmentos de código y qué están haciendo?**
 ####
-Esto es para que Unity detecte el port. <` ✓ `>
+Para que Unity detecte el port. <` ✓ `>
 ``` c++
 SerialPort _serialPort = new SerialPort();
 _serialPort.PortName = "/dev/ttyUSB0";
@@ -211,7 +211,7 @@ Se envía info al controlador. <` ✓ `>
 byte[] data = { 0x01, 0x3F, 0x45};
 _serialPort.Write(data,0,1);
 ```
-Pone el mínimo del buffer (4 bytes), y el otro es un if para ver si los bytes que se pueden leer son mayores o igual a 4, y escribirá. <` ✓ `>
+Pone el índice del buffer (4 para 4 bytes), y el otro es un if para ver si los bytes que se pueden leer son mayores o igual a 4, y escribirá los bytes enviados en punto flotante recorriendo el array. <` ✓ `>
 ``` c++
 byte[] buffer =new byte[4];
 .
@@ -459,7 +459,7 @@ if(_serialPort.BytesToRead >= 4){
   _serialPort.Read(buffer,0,4);
   Console.WriteLine(System.BitConverter.ToSingle(buffer,0));
 ```
-Presta especial atención System.BitConverter.ToSingle. Ahora, te pediré que busques en la documentación de Microsoft de C# qué más te ofrece System.BitConverter.
+Presta especial atención `System.BitConverter.ToSingle`. Ahora, te pediré que busques en la documentación de Microsoft de C# qué más te ofrece `System.BitConverter`.
 #### Códigos
 Controlador:
 ``` c++
@@ -475,7 +475,32 @@ Unity:
 ### *¿Cómo funciona?*
 
 
+# TRABAJO FINAL
+En este trabajo final vas a crear un protocolo binario para comunicar la aplicación del PC y el microcontrolador.
+####
+1. Vas a leer mínimo **tres variables**: la primera será la `variable real temperatura` a través del *sensor* incorporado en el Raspberry Pi Pico y las otras pueden ser `variables creadas a través de contadores`. En este trabajo las variables *deben* ser números en `punto flotante` y **el delta de cambio ya no es UNO**, sino un número en punto flotante.
+2. Para leer las variables del microcontrolador, el *PC enviará un BYTE* (tu decides cuál). El microcontrolador responderá la solicitud con la información de *TODAS las variables*. Por cada variable se deben indicar tres elementos:
+    - el `valor actual`
+    - si `está habilitada`
+    - el `intervalo` o `delta` de *cambio de la variable*.
+4. Debes incluir un *byte extra* al final que cambiará en función de la información que envíes (*checksum*). Parte del ejercicio es consultar cómo puedes construir el `checksum` e implementarlo. La idea con este byte es que el receptor pueda verificar que la **información recibida no se dañó en el camino**.
+5. El microcontrolador deberá mantener un **LED funcionando** a una frecuencia de `0.5 Hz`. El objetivo de este LED es que verifiques de manera visual que la aplicación en el microcontrolador *NUNCA se bloquea*.
+####
+Para desarrollar lo anterior **crea una mejor versión de la experiencia trabajada en la unidad anterior** y haz  los ajustes para incluir la variable temperatura en caso de que no la tengas y los otros elementos a los que haya lugar de acuerdo a los requerimientos.
 
+#### Códigos
+Controlador:
+``` c++
+
+```
+Unity:
+``` c++
+
+```
+#### Interfaz
+
+
+### *¿Cómo funciona?*
 
 
 
