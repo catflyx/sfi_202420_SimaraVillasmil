@@ -461,19 +461,131 @@ if(_serialPort.BytesToRead >= 4){
 ```
 Presta especial atención `System.BitConverter.ToSingle`. Ahora, te pediré que busques en la documentación de Microsoft de C# qué más te ofrece `System.BitConverter`.
 #### Códigos
-Controlador:
+Microcontrolador:
 ``` c++
+void setup() {
+    Serial.begin(9600);  // Inicializa la comunicación serie a 9600 bps
+    pinMode(13, OUTPUT); // Configura el pin 13 como salida
+}
+
+void loop() {
+    // Genera dos números de punto flotante aleatorios
+    float num1 = random(0, 100) / 10.0; // Un número entre 0.0 y 10.0
+    float num2 = random(0, 100) / 10.0; // Un número entre 0.0 y 10.0
+
+    Serial.print(num1); Serial.print(","); Serial.print(num2);
+    Serial.print('\n'); Serial.print('\n');
+
+    // Envía los números en formato binario
+    Serial.write((uint8_t*)&num1, sizeof(num1)); // Envía el primer float
+    Serial.write((uint8_t*)&num2, sizeof(num2)); // Envía el segundo float
+    Serial.print('\n');
+    
+    // Enciende el LED
+    digitalWrite(13, HIGH);
+    delay(200); // Mantiene el LED encendido por un momento
+    digitalWrite(13, LOW); // Apaga el LED
+    
+    delay(1000); // Espera 1 segundo antes de enviar nuevamente
+}
 
 ```
 Unity:
 ``` c++
+using UnityEngine;
+using System.IO.Ports;
+using System;
 
+public class Serial2 : MonoBehaviour
+{
+    private SerialPort _serialPort;
+    private Vector3 position;
+
+    private float x, y; int b;
+
+    public SpriteRenderer sprite;
+
+    void Start()
+    {
+        // Cambia "COM4" por el puerto que estés usando
+        _serialPort = new SerialPort("COM4", 9600);
+
+        try
+        {
+            _serialPort.Open();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error al abrir el puerto serie: " + e.Message);
+        }
+
+        x = 0; y = 0; b = 0;
+        position = new Vector3(x, y, transform.position.z);
+        transform.position = position;
+    }
+
+    void Update()
+    {
+        if (_serialPort.IsOpen && _serialPort.BytesToRead >= 8 || b >= 8)
+        {
+            byte[] buffer = new byte[8];
+            _serialPort.Read(buffer, 0, 8);
+
+            x = BitConverter.ToSingle(buffer, 0);
+            y = BitConverter.ToSingle(buffer, 4);
+
+            // Modificar la posición del GameObject
+            position = new Vector3(x, y, transform.position.z);
+            transform.position = position;
+
+            Debug.Log("Triangle moved to (" + x + "," + y + ")");
+        }
+
+        if (Input.GetKeyDown("a"))
+        {
+            sprite.flipY = false;
+            SendKeyPress(1); // Envía un byte (1) para indicar que se presionó "a"
+            b++; HowManyBytes();
+        }
+        if (Input.GetKeyDown("d"))
+        {
+            sprite.flipY = true;
+            SendKeyPress(2); // Envía un byte (2) para indicar que se presionó "d"
+            b++;  HowManyBytes();
+        }
+
+        void HowManyBytes()
+        {
+            Debug.Log("Bytes enviados: " + b);
+        }
+        if (b >= 8)
+        {
+            b = 0;
+        }
+
+        void SendKeyPress(byte key)
+        {
+            if (_serialPort.IsOpen)
+            {
+                _serialPort.Write(key.ToString());
+            }
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        if (_serialPort != null && _serialPort.IsOpen)
+        {
+            _serialPort.Close();
+        }
+    }
+}
 ```
 #### Interfaz
-
+![image](https://github.com/user-attachments/assets/06d35c64-da7d-45fa-83ff-4a3f30fc31cd)
 
 ### *¿Cómo funciona?*
-
+...
 
 # TRABAJO FINAL
 En este trabajo final vas a crear un protocolo binario para comunicar la aplicación del PC y el microcontrolador.
