@@ -473,13 +473,13 @@ void loop() {
     float num1 = random(0, 100) / 10.0; // Un número entre 0.0 y 10.0
     float num2 = random(0, 100) / 10.0; // Un número entre 0.0 y 10.0
 
-    Serial.print(num1); Serial.print(","); Serial.print(num2);
-    Serial.print('\n'); Serial.print('\n');
+    //Serial.print(num1); Serial.print(","); Serial.print(num2);
+    //Serial.print('\n'); Serial.print('\n');
 
     // Envía los números en formato binario
     Serial.write((uint8_t*)&num1, sizeof(num1)); // Envía el primer float
     Serial.write((uint8_t*)&num2, sizeof(num2)); // Envía el segundo float
-    Serial.print('\n');
+    //Serial.print('\n');
     
     // Enciende el LED
     digitalWrite(13, HIGH);
@@ -488,7 +488,6 @@ void loop() {
     
     delay(1000); // Espera 1 segundo antes de enviar nuevamente
 }
-
 ```
 Unity:
 ``` c++
@@ -526,7 +525,7 @@ public class Serial2 : MonoBehaviour
 
     void Update()
     {
-        if (_serialPort.IsOpen && _serialPort.BytesToRead >= 8 || b >= 8)
+        if (_serialPort.IsOpen && _serialPort.BytesToRead >= 8)
         {
             byte[] buffer = new byte[8];
             _serialPort.Read(buffer, 0, 8);
@@ -538,37 +537,55 @@ public class Serial2 : MonoBehaviour
             position = new Vector3(x, y, transform.position.z);
             transform.position = position;
 
+            ChangeColor();
+
             Debug.Log("Triangle moved to (" + x + "," + y + ")");
         }
+        if (b >= 8)
+        {
+            // Obtiene la posición de la cámara
+            Camera mainCamera = Camera.main;
+
+            // Calcula los límites en el espacio del mundo
+            Vector3 min = mainCamera.ViewportToWorldPoint(new Vector3(0, 0, mainCamera.nearClipPlane));
+            Vector3 max = mainCamera.ViewportToWorldPoint(new Vector3(1, 1, mainCamera.nearClipPlane));
+
+            // Genera nuevas coordenadas aleatorias dentro de los límites de la cámara
+            x = UnityEngine.Random.Range(min.x, max.x);
+            y = UnityEngine.Random.Range(min.y, max.y);
+
+            position = new Vector3(x, y, transform.position.z);
+            transform.position = position;
+
+            ChangeColor();
+
+            Debug.Log("Triangle moved to (" + x + "," + y + ")");
+
+            b = 0;
+        }
+
 
         if (Input.GetKeyDown("a"))
         {
             sprite.flipY = false;
             SendKeyPress(1); // Envía un byte (1) para indicar que se presionó "a"
-            b++; HowManyBytes();
         }
         if (Input.GetKeyDown("d"))
         {
             sprite.flipY = true;
             SendKeyPress(2); // Envía un byte (2) para indicar que se presionó "d"
-            b++;  HowManyBytes();
-        }
-
-        void HowManyBytes()
-        {
-            Debug.Log("Bytes enviados: " + b);
-        }
-        if (b >= 8)
-        {
-            b = 0;
         }
 
         void SendKeyPress(byte key)
         {
             if (_serialPort.IsOpen)
             {
-                _serialPort.Write(key.ToString());
+                // Crea un array de bytes con el byte que deseas enviar
+                byte[] byteArray = new byte[1] { key };
+                _serialPort.Write(byteArray, 0, 1); // Envía el byte
             }
+
+            b++; Debug.Log("Bytes enviados: " + b);
         }
     }
 
@@ -578,6 +595,16 @@ public class Serial2 : MonoBehaviour
         {
             _serialPort.Close();
         }
+    }
+
+    private void ChangeColor()
+    {
+        // Genera un color aleatorio
+        Color randomColor = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+
+        // Asigna el color al SpriteRenderer (asegúrate de tener un componente SpriteRenderer en el objeto)
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.color = randomColor;
     }
 }
 ```
