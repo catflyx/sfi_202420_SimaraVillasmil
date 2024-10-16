@@ -628,19 +628,256 @@ En este trabajo final vas a crear un protocolo binario para comunicar la aplicac
 Para desarrollar lo anterior **crea una mejor versión de la experiencia trabajada en la unidad anterior** y haz  los ajustes para incluir la variable temperatura en caso de que no la tengas y los otros elementos a los que haya lugar de acuerdo a los requerimientos.
 
 #### Códigos
-Controlador:
+Microcontrolador:
 ``` c++
+const int ledPin = 25; 
+unsigned long previousMillis = 0; 
+const long interval = 250; 
+float currentLumenes = 50.0; float currentTemperature = 22.0; 
+float pesos = 100000.0; 
+bool lumenesHabilitados = true; bool temperaturaHabilitada = true; 
+float deltaLumenes = 5.0; float deltaTemperatura = 0.5; float deltaPesos = -100.0;
 
+// Función para parpadear el LED 
+void blinkLED() { unsigned long currentMillis = millis();
+
+if (currentMillis - previousMillis >= interval)
+{
+    previousMillis = currentMillis;
+    int ledState = digitalRead(ledPin);
+    digitalWrite(ledPin, !ledState);
+}
+}
+
+void setup() { Serial.begin(9600); pinMode(ledPin, OUTPUT); }
+
+void loop() { blinkLED(); // Parpadeo del LED
+
+// Si el PC envía un byte de solicitud, responder con la información de las variables
+if (Serial.available() > 0)
+{
+    char request = Serial.read();  // Leer el BYTE de solicitud
+    if (request == 'A')  // Usaremos el BYTE 'A' como solicitud
+    {
+        // Enviar los valores de todas las variables
+        Serial.print("Lumenes:");
+        Serial.print(currentLumenes);
+        Serial.print(", Habilitado:");
+        Serial.print(lumenesHabilitados ? "1" : "0");
+        Serial.print(", Delta:");
+        Serial.println(deltaLumenes);
+
+        Serial.print("Temperatura:");
+        Serial.print(currentTemperature);
+        Serial.print(", Habilitada:");
+        Serial.print(temperaturaHabilitada ? "1" : "0");
+        Serial.print(", Delta:");
+        Serial.println(deltaTemperatura);
+
+        Serial.print("Pesos:");
+        Serial.print(pesos);
+        Serial.print(", Habilitada:");
+        Serial.print((pesos >= 0) ? "1" : "0");
+        Serial.print(", Delta:");
+        Serial.println(deltaPesos);
+    }
+}
+}
 ```
 Unity:
 ``` c++
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using System.IO.Ports;
 
+public class SerialCommunication : MonoBehaviour
+{
+    private SerialPort serialPort;
+    public TextMeshProUGUI pesosText;
+    public Slider temperatureSlider;
+    public Slider lumenSlider;
+    public Button buyButton;
+    public Button buyExpensiveButton;    // Botón para la compra cara
+    public Button buyCheapButton;        // Botón para la compra barata
+    public TextMeshProUGUI mensajeErrorText;
+
+    void Start()
+    {
+
+        if (GameManager.instance.comunicacionHabilitada)
+        {
+            mensajeErrorText.alpha = 0;
+            // Usar el baud rate seleccionado
+            serialPort = new SerialPort("COM4", GameManager.instance.baudRate);
+            try
+            {
+                serialPort.Open();
+                serialPort.ReadTimeout = 1000;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError("Error al abrir el puerto serial: " + e.Message);
+            }
+        }
+
+        // Cargar los valores desde el GameManager
+        lumenSlider.value = GameManager.instance.lumenes;
+        temperatureSlider.value = GameManager.instance.temperatura;
+        pesosText.text = "Pesos: " + GameManager.instance.pesos;
+
+        buyButton.onClick.AddListener(SendValuesToMicrocontroller);
+        buyExpensiveButton.onClick.AddListener(BuyExpensiveLight);
+        buyCheapButton.onClick.AddListener(BuyCheapLight);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            CheckTemperatureAndChangeScene();
+        }
+        
+        if (serialPort.IsOpen && serialPort.BytesToRead > 0)
+        {
+            string receivedData = serialPort.ReadLine();
+            Debug.Log("Datos recibidos del microcontrolador: " + receivedData);
+        }
+        
+         if (Input.GetKeyDown(KeyCode.Return))
+        {
+            CheckLumenesAndChangeScene();
+        }
+    }
+
+    void SendValuesToMicrocontroller()
+    {
+        if (serialPort.IsOpen)
+        {
+            float lumenes = Mathf.RoundToInt(lumenSlider.value);
+            float temperatura = temperatureSlider.value;
+
+            string dataToSend = $"L={lumenes},T={temperatura:F2},P={GameManager.instance.pesos}";
+            serialPort.WriteLine(dataToSend);
+            Debug.Log("Datos enviados al microcontrolador: " + dataToSend);
+
+            if (GameManager.instance.pesos >= GameManager.instance.precioRL && GameManager.instance.pesosHabilitados == true)
+            {
+                GameManager.instance.pesos -= GameManager.instance.precioRL;
+                if (GameManager.instance.luzHabilitada == true)
+                {
+                    lumenSlider.value += GameManager.instance.aumentoLyT;
+                }
+                else
+                {
+                    mensajeErrorText.alpha = 100;
+                    mensajeErrorText.text = "Luz no habilitada";
+                }
+                if (GameManager.instance.temperaturaHabilitada == true)
+                {
+                    temperatureSlider.value += GameManager.instance.aumentoLyT;
+                }
+                else
+                {
+                    mensajeErrorText.alpha = 100;
+                    mensajeErrorText.text = "Temperatura no habilitada";
+                }               
+                pesosText.text = "Pesos: " + GameManager.instance.pesos;
+            }
+            else
+            {
+                mensajeErrorText.alpha = 100;
+                mensajeErrorText.text = "No hay suficiente dinero para realizar la compra. o no está habilitada";
+            }
+        }
+    }
+
+    void CheckTemperatureAndChangeScene()
+    {
+        float currentTemperature = temperatureSlider.value;
+
+        if (currentTemperature >= 26f)
+        {
+            Debug.Log("Temperatura suficiente. Cambiando a la escena Piso4.");
+            SceneManager.LoadScene("Piso4Lore");
+        }
+        else if (GameManager.instance.pesosHabilitados == false)
+        {
+            SceneManager.LoadScene("Piso4Lore");
+        }
+        else
+        {
+            Debug.Log("La temperatura es demasiado baja para cambiar de escena.");
+        }
+    }
+
+    void BuyExpensiveLight()
+    {
+        float cost = GameManager.instance.precioVelon;  // Precio de la luz cara
+        float lumenIncrease = GameManager.instance.aumento_L;  // Aumento significativo de lúmenes
+
+        if (GameManager.instance.pesos >= cost)
+        {
+            // Reducir el dinero y aumentar los lúmenes
+            GameManager.instance.pesos -= cost;
+            GameManager.instance.lumenes += lumenIncrease;
+
+            // Actualizar la UI
+            pesosText.text = "Pesos: " + GameManager.instance.pesos;
+            lumenSlider.value = GameManager.instance.lumenes;
+
+            Debug.Log("Luz cara comprada. Lúmenes: " + GameManager.instance.lumenes + ", Pesos: " + GameManager.instance.pesos);
+        }
+        else
+        {
+            Debug.LogWarning("No tienes suficientes pesos para comprar el velón.");
+        }
+    }
+    void BuyCheapLight()
+    {
+        float cost = GameManager.instance.precioCP;  // Precio de la luz barata
+        float lumenIncrease = GameManager.instance.aumento_l;  // Aumento menor de lúmenes
+
+        if (GameManager.instance.pesos >= cost)
+        {
+            // Reducir el dinero y aumentar los lúmenes
+            GameManager.instance.pesos -= cost;
+            GameManager.instance.lumenes += lumenIncrease;
+
+            // Actualizar la UI
+            pesosText.text = "Pesos: " + GameManager.instance.pesos;
+            lumenSlider.value = GameManager.instance.lumenes;
+
+            Debug.Log("Luz barata comprada. Lúmenes: " + GameManager.instance.lumenes + ", Pesos: " + GameManager.instance.pesos);
+        }
+        else
+        {
+            Debug.LogWarning("No tienes suficientes pesos para comprar las chispitas mariposa.");
+        }
+    }
+    void CheckLumenesAndChangeScene()
+    {
+        if (GameManager.instance.lumenes >= 100)
+        {
+            Debug.Log("Lúmenes suficientes. Cambiando a la escena Piso3.");
+            SceneManager.LoadScene("Piso3");  // Cambiar a la escena Piso3
+        }
+        else
+        {
+            Debug.Log("No tienes suficientes lúmenes para cambiar de escena.");
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        if (serialPort.IsOpen)
+        {
+            serialPort.Close();
+        }
+    }
+}
 ```
 #### Interfaz
-
-
-### *¿Cómo funciona?*
-
-
-
+![image](https://github.com/user-attachments/assets/5fe7f88b-e47a-45df-9747-cbbe182e3697)
 
