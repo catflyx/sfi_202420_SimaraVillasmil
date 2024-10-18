@@ -494,21 +494,16 @@ Unity:
 using UnityEngine;
 using System.IO.Ports;
 using System;
-
 public class Serial2 : MonoBehaviour
 {
     private SerialPort _serialPort;
     private Vector3 position;
-
     private float x, y; int b;
-
     public SpriteRenderer sprite;
-
     void Start()
     {
         // Cambia "COM4" por el puerto que estés usando
         _serialPort = new SerialPort("COM4", 9600);
-
         try
         {
             _serialPort.Open();
@@ -517,14 +512,19 @@ public class Serial2 : MonoBehaviour
         {
             Debug.LogError("Error al abrir el puerto serie: " + e.Message);
         }
-
         x = 0; y = 0; b = 0;
         position = new Vector3(x, y, transform.position.z);
         transform.position = position;
     }
-
     void Update()
     {
+        // Obtiene la posición de la cámara
+        Camera mainCamera = Camera.main;
+
+        // Calcula los límites en el espacio del mundo
+        Vector3 min = mainCamera.ViewportToWorldPoint(new Vector3(0, 0, mainCamera.nearClipPlane));
+        Vector3 max = mainCamera.ViewportToWorldPoint(new Vector3(1, 1, mainCamera.nearClipPlane));
+
         if (_serialPort.IsOpen && _serialPort.BytesToRead >= 8)
         {
             byte[] buffer = new byte[8];
@@ -533,59 +533,47 @@ public class Serial2 : MonoBehaviour
             x = BitConverter.ToSingle(buffer, 0);
             y = BitConverter.ToSingle(buffer, 4);
 
+            x = Mathf.Clamp(x, min.x, max.x);
+            y = Mathf.Clamp(y, min.y, max.y);
+
             // Modificar la posición del GameObject
             position = new Vector3(x, y, transform.position.z);
             transform.position = position;
-
-            ChangeColor();
 
             Debug.Log("Triangle moved to (" + x + "," + y + ")");
         }
         if (b >= 8)
         {
-            // Obtiene la posición de la cámara
-            Camera mainCamera = Camera.main;
-
-            // Calcula los límites en el espacio del mundo
-            Vector3 min = mainCamera.ViewportToWorldPoint(new Vector3(0, 0, mainCamera.nearClipPlane));
-            Vector3 max = mainCamera.ViewportToWorldPoint(new Vector3(1, 1, mainCamera.nearClipPlane));
-
-            // Genera nuevas coordenadas aleatorias dentro de los límites de la cámara
             x = UnityEngine.Random.Range(min.x, max.x);
             y = UnityEngine.Random.Range(min.y, max.y);
 
             position = new Vector3(x, y, transform.position.z);
             transform.position = position;
 
-            ChangeColor();
-
             Debug.Log("Triangle moved to (" + x + "," + y + ")");
 
             b = 0;
         }
 
-
         if (Input.GetKeyDown("a"))
         {
             sprite.flipY = false;
             SendKeyPress(1); // Envía un byte (1) para indicar que se presionó "a"
+            b++; Debug.Log("Bytes enviados: " + b);
         }
         if (Input.GetKeyDown("d"))
         {
             sprite.flipY = true;
             SendKeyPress(2); // Envía un byte (2) para indicar que se presionó "d"
+            b++; Debug.Log("Bytes enviados: " + b);
         }
 
         void SendKeyPress(byte key)
         {
             if (_serialPort.IsOpen)
             {
-                // Crea un array de bytes con el byte que deseas enviar
-                byte[] byteArray = new byte[1] { key };
-                _serialPort.Write(byteArray, 0, 1); // Envía el byte
+                _serialPort.Write(key.ToString());
             }
-
-            b++; Debug.Log("Bytes enviados: " + b);
         }
     }
 
@@ -596,23 +584,15 @@ public class Serial2 : MonoBehaviour
             _serialPort.Close();
         }
     }
-
-    private void ChangeColor()
-    {
-        // Genera un color aleatorio
-        Color randomColor = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
-
-        // Asigna el color al SpriteRenderer (asegúrate de tener un componente SpriteRenderer en el objeto)
-        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-        spriteRenderer.color = randomColor;
-    }
 }
 ```
 #### Interfaz
 ![image](https://github.com/user-attachments/assets/06d35c64-da7d-45fa-83ff-4a3f30fc31cd)
 
 ### *¿Cómo funciona?*
-...
+El triangulo se voltea presionando 'a' para la `izquierda`, y 'd' para la `derecha`. Cuando se voltea 8 veces o más, signfica que también se han enviado `8 bytes` o más, por tanto, cuando esto suceda, dos números creados aleatoriamente por el controlador serán enviados a Unity para que los use como coordenadas para el triángulo. Entonces, al enviarse los `8 bytes`, el triángulo `cambiará de posición`.
+
+El programa funcionará de esta manera indefinidamente.
 
 # TRABAJO FINAL
 En este trabajo final vas a crear un protocolo binario para comunicar la aplicación del PC y el microcontrolador.
